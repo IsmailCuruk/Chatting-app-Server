@@ -2,10 +2,13 @@ const express = require('express')
 const socketIo = require('socket.io')
 const cors = require('cors')
 const bodyParser = require('body-parser')
+const messagesRouter = require('./messages/routes');
+const colors = require('colors')
 
 const app = express()
 app.use(cors())
 app.use(bodyParser.json())
+app.use(messagesRouter)
 
 function dispatchMessages () {
   const action = {
@@ -19,7 +22,7 @@ app.post('/message', (request, response) => {
   const { message } = request.body
   // const message = request.body.message
 
-  console.log('message test:', message)
+  console.log('message test:'.yellow, message)
 
   messages.push(message)
 
@@ -29,26 +32,25 @@ app.post('/message', (request, response) => {
 })
 
 function onListen () {
-  console.log('Listening on port 4000')
+  console.log('Listening on port 4000'.green)
 }
 
 const server = app.listen(4000, onListen)
-// app.listen(4000, () => console.log("Listening..."))
-//
-const io = socketIo.listen(server)
+
+global.io = socketIo.listen(server)
 
 const messages = ['goodbye']
 
 io.on(
   'connection',
   client => {
-    console.log('client.id test:', client.id)
+    console.log('client.id test:'.yellow, client.id)
 
     dispatchMessages()
 
     client.on(
       'disconnect',
-      () => console.log('disconnect test:', client.id)
+      () => console.log('disconnect test:'.yellow, client.id)
     )
   }
 )
